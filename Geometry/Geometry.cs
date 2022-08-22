@@ -92,7 +92,7 @@ namespace Geometry
         }
 
         /// <summary>
-        /// 平面点位坐标
+        /// 平面坐标
         /// </summary>
         public struct Point2D
         {
@@ -183,6 +183,122 @@ namespace Geometry
         }
 
         /// <summary>
+        /// PID参数结构体
+        /// </summary>
+        public struct PIDHelper
+        {
+            /// <summary>
+            /// PID参数初始化
+            /// </summary>
+            /// <param name="Kp">P比例值</param>
+            /// <param name="Ki">I积分值</param>
+            /// <param name="Kd">D微分值</param>
+            /// <param name="DeadBand">死区宽度</param>
+            /// <param name="MaxLimit">最大值限制</param>
+            /// <param name="MinLimit">最小值限制</param>
+            /// <param name="setvalue">目标值</param>
+            public PIDHelper(double Kp, double Ki, double Kd, double DeadBand, double MaxLimit, double MinLimit,double setvalue)
+            {
+                prakp = Kp;
+                praki = Ki;
+                prakd = Kd;
+                deadband = DeadBand;
+                MAXLIM = MaxLimit;
+                MINLIM = MinLimit;
+                setValue = setvalue;
+                err = 0;
+                err_last=0;
+                err_next = 0;
+
+            }
+
+            private double prakp;
+            /// <summary>
+            /// -rando
+            /// 比例的参数信息
+            /// </summary>
+            public double Kp
+            {
+                set => this.prakp = value;
+                get => this.prakp;
+            }
+
+            private double praki;
+            /// <summary>积分的参数信息</summary>
+            public double Ki
+            {
+                set => this.praki = value;
+                get => this.praki;
+            }
+
+            private double prakd;
+            /// <summary>微分的参数信息</summary>
+            public double Kd
+            {
+                set => this.prakd = value;
+                get => this.prakd;
+            }
+
+            private double deadband;
+            /// <summary>获取或设置死区的值</summary>
+            public double DeadBand
+            {
+                set => this.deadband = value;
+                get => this.deadband;
+            }
+
+            private double MAXLIM;
+            /// <summary>获取或设置输出的上限，默认为没有设置</summary>
+            public double MaxLimit
+            {
+                set => this.MAXLIM = value;
+                get => this.MAXLIM;
+            }
+
+            private double MINLIM;
+            /// <summary>获取或设置输出的下限，默认为没有设置</summary>
+            public double MinLimit
+            {
+                set => this.MINLIM = value;
+                get => this.MINLIM;
+            }
+
+            private double setValue;
+            /// <summary>获取或设置目标值</summary>
+            public double SetValue
+            {
+                set => this.setValue = value;
+                get => this.setValue;
+            }
+
+            private double err;
+            /// <summary>偏差值</summary>
+            public double Err
+            {
+                get => this.Err;
+                set=> this.Err = value;
+            }
+
+            private double err_last;
+            /// <summary>上一个偏差值</summary>
+            public double Err_Last
+            {
+                get => this.Err_Last;
+                set => this.Err_Last = value;
+            }
+
+            private double err_next;
+            /// <summary>下一个偏差</summary>
+            public double Err_Next
+            {
+                get { return err_next; }
+                set { err_next = value; }
+            }
+
+        }
+
+
+        /// <summary>
         /// 点线测量
         /// </summary>
         /// <param name="linex1">线起始X</param>
@@ -227,10 +343,10 @@ namespace Geometry
         /// <summary>
         /// 点点测量
         /// </summary>
-        /// <param name="pointx1">点一X</param>
-        /// <param name="pointy1">点一Y</param>
-        /// <param name="pointx2">点二X</param>
-        /// <param name="pointy2">点二Y</param>
+        /// <param name="pointx1">起始点X</param>
+        /// <param name="pointy1">起始点Y</param>
+        /// <param name="pointx2">结束点X</param>
+        /// <param name="pointy2">结束点Y</param>
         /// <param name="conversion">像素单位</param>
         /// <returns>距离</returns>
         public static double PointMeasure(double pointx1, double pointy1, double pointx2, double pointy2, double conversion = 1)
@@ -295,6 +411,26 @@ namespace Geometry
             double a1 = Math.Abs((a * p.X) + (b * p.Y) + (c * p.Z) + d);
             double b1 = Math.Sqrt((a * a) + (b * b) + (c * c));
             return a1 / b1;
+        }
+
+       /// <summary>
+       /// 增量式PID算法
+       /// </summary>
+       /// <param name="helper">PID参数结构</param>
+       /// <param name="prvalue">实际值</param>
+       /// <returns></returns>
+        public static double PidCalculate(PIDHelper helper,double prvalue)
+        {
+            double value = prvalue;
+            helper.Err_Next = helper.Err_Last;
+            helper.Err_Last = helper.Err;
+            helper.Err = helper.SetValue - value;
+            value += helper.Kp * (helper.Err - helper.Err_Last + helper.Ki * helper.Err + helper.Kd * (helper.Err - 2.0 * helper.Err_Last + helper.Err_Next));
+            if (value > helper.MaxLimit)
+                value = helper.MaxLimit;
+            if (value <  helper.MinLimit)
+                value = helper.MinLimit;
+            return value;
         }
     }
 }
