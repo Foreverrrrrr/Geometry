@@ -11,7 +11,6 @@ namespace Geometry
     /// </summary>
     public static class Geometry
     {
-
         /// <summary>
         /// 倾斜角基准
         /// </summary>
@@ -26,7 +25,6 @@ namespace Geometry
             /// </summary>
             PerpendiCularLine
         }
-
 
         /// <summary>
         /// 平面直线坐标
@@ -53,7 +51,6 @@ namespace Geometry
             }
 
             private double _startx;
-
             /// <summary>
             /// 直线起始X坐标
             /// </summary>
@@ -74,7 +71,6 @@ namespace Geometry
             }
 
             private double _endx;
-
             /// <summary>
             /// 直线结束X坐标
             /// </summary>
@@ -93,7 +89,6 @@ namespace Geometry
                 get { return _endy; }
                 set { _endy = value; }
             }
-
         }
 
         /// <summary>
@@ -157,7 +152,6 @@ namespace Geometry
             }
 
             private double _x;
-
             /// <summary>
             /// 空间X坐标
             /// </summary>
@@ -168,7 +162,6 @@ namespace Geometry
             }
 
             private double _y;
-
             /// <summary>
             /// 空间Y坐标
             /// </summary>
@@ -179,7 +172,6 @@ namespace Geometry
             }
 
             private double _z;
-
             /// <summary>
             /// 空间Z坐标
             /// </summary>
@@ -241,7 +233,7 @@ namespace Geometry
         /// <param name="pointy2">点二Y</param>
         /// <param name="conversion">像素单位</param>
         /// <returns>距离</returns>
-        public static double Point(double pointx1, double pointy1, double pointx2, double pointy2, double conversion = 1)
+        public static double PointMeasure(double pointx1, double pointy1, double pointx2, double pointy2, double conversion = 1)
         {
             return Math.Sqrt(Math.Pow((Math.Abs(pointx1 - pointx2)), 2.0) + Math.Pow(Math.Abs((pointy1 - pointy2)), 2.0)) * conversion;
         }
@@ -265,8 +257,6 @@ namespace Geometry
             }
             return Math.Atan(k) * 180 / Math.PI;
         }
-
-
 
         /// <summary>
         /// 几何平面一般式
