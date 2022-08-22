@@ -256,11 +256,11 @@ namespace Geometry
         {
             double k = 0;
             if (criterion == AngleCriterion.PerpendiCularLine)
-            {
+        {
                 k = ((line.StartX - line.EndX) / (line.StartY - line.EndY));
-            }
+        }
             else
-            {
+        {
                 k = ((line.StartY - line.EndY) / (line.StartX - line.EndX));
             }
             return Math.Atan(k) * 180 / Math.PI;
