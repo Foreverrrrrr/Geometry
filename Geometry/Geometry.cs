@@ -11,7 +11,6 @@ namespace Geometry
     /// </summary>
     public static class Geometry
     {
-
         /// <summary>
         /// 倾斜角基准
         /// </summary>
@@ -26,7 +25,6 @@ namespace Geometry
             /// </summary>
             PerpendiCularLine
         }
-
 
         /// <summary>
         /// 平面直线坐标
@@ -265,6 +263,8 @@ namespace Geometry
             }
             return Math.Atan(k) * 180 / Math.PI;
         }
+
+     
 
         /// <summary>
         /// 几何平面一般式
