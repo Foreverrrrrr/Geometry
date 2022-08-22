@@ -11,6 +11,7 @@ namespace Geometry
     /// </summary>
     public static class Geometry
     {
+
         /// <summary>
         /// 倾斜角基准
         /// </summary>
@@ -25,6 +26,7 @@ namespace Geometry
             /// </summary>
             PerpendiCularLine
         }
+
 
         /// <summary>
         /// 平面直线坐标
@@ -254,11 +256,11 @@ namespace Geometry
         {
             double k = 0;
             if (criterion == AngleCriterion.PerpendiCularLine)
-            {
+        {
                 k = ((line.StartX - line.EndX) / (line.StartY - line.EndY));
-            }
+        }
             else
-            {
+        {
                 k = ((line.StartY - line.EndY) / (line.StartX - line.EndX));
             }
             return Math.Atan(k) * 180 / Math.PI;
