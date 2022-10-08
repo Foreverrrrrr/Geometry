@@ -293,6 +293,91 @@ namespace Geometry
 
         }
 
+        public struct Kalman
+        {
+            public Kalman(double R,double Q,double A=1,double B=0,double C=1,double x=0)
+            {
+                _a=A;
+                _b=B;
+                _c=C;
+                _r = R;
+                _q=Q;
+                _x=x;
+                _cov = double.NaN;
+            }
+
+            private double _a;
+            /// <summary>
+            /// 状态转移方程
+            /// </summary>
+            public double A
+            {
+                get { return _a; }
+                set { _a = value; }
+            }
+
+            private double _b;
+            /// <summary>
+            /// 控制输入参数
+            /// </summary>
+            public double B
+            {
+                get { return _b; }
+                set { _b = value; }
+            }
+
+            private double _c;
+            /// <summary>
+            /// 观测方程
+            /// </summary>
+            public double C
+            {
+                get { return _c; }
+                set { _c = value; }
+            }
+
+            private double _r;
+            /// <summary>
+            /// 过程噪声
+            /// </summary>
+            public double R
+            {
+                get { return _r; }
+                set { _r = value; }
+            }
+
+            private double _q;
+            /// <summary>
+            /// 测量噪声
+            /// </summary>
+            public double Q
+            {
+                get { return _q; }
+                set { _q = value; }
+            }
+
+            private double _cov;
+            /// <summary>
+            /// 
+            /// </summary>
+            public double Cov
+            {
+                get { return _cov; }
+                set { _cov = value; }
+            }
+
+            private double _x;
+            /// <summary>
+            /// 初始值
+            /// </summary>
+            public double X
+            {
+                get { return _x; }
+                set { _x = value; }
+            }
+
+        }
+
         /// <summary>
         /// 点线测量
         /// </summary>
@@ -426,6 +511,35 @@ namespace Geometry
             if (value <  helper.MinLimit)
                 value = helper.MinLimit;
             return value;
+        }
+
+        /// <summary>
+        /// 一介卡尔曼滤波算法
+        /// </summary>
+        /// <param name="kalman">卡尔曼参数</param>
+        /// <param name="value">输入值</param>
+        /// <param name="filtered"></param>
+        /// <returns></returns>
+        public static double AlittleKalman(Kalman kalman,double value,double filtered)
+        {
+            if (double.IsNaN(kalman.X))
+            {
+                kalman.X = (1 / kalman.C) * value;
+                kalman.Cov = (1 / kalman.C) * kalman.Q * (1 / kalman.C);
+            }
+            else
+            {
+                double predX = (kalman.A * kalman.X) + (kalman.B * filtered);
+                double predCov = ((kalman.A * kalman.Cov) * kalman.A) + kalman.R;
+
+                // Kalman gain
+                double K = predCov * kalman.C * (1 / ((kalman.C * predCov * kalman.C) + kalman.Q));
+
+                // Correction
+                kalman.X = predX + K * (value - (kalman.C * predX));
+                kalman.Cov = predCov - (K * kalman.C * predCov);
+            }
+            return kalman.X;
         }
     }
 }
