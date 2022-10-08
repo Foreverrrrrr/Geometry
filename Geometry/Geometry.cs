@@ -212,10 +212,7 @@ namespace Geometry
             }
 
             private double prakp;
-            /// <summary>
-            /// -rando
-            /// 比例的参数信息
-            /// </summary>
+            /// <summary>比例的参数信息</summary>
             public double Kp
             {
                 set => this.prakp = value;
@@ -295,7 +292,6 @@ namespace Geometry
             }
 
         }
-
 
         /// <summary>
         /// 点线测量
