@@ -209,7 +209,6 @@ namespace Geometry
                 err = 0;
                 err_last=0;
                 err_next = 0;
-
             }
 
             private double prakp;
@@ -275,16 +274,16 @@ namespace Geometry
             /// <summary>偏差值</summary>
             public double Err
             {
-                get => this.Err;
-                set=> this.Err = value;
+                get => this.err;
+                set=> this.err = value;
             }
 
             private double err_last;
             /// <summary>上一个偏差值</summary>
             public double Err_Last
             {
-                get => this.Err_Last;
-                set => this.Err_Last = value;
+                get => this.err_last;
+                set => this.err_last = value;
             }
 
             private double err_next;
