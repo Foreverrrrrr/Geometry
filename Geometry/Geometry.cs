@@ -419,7 +419,7 @@ namespace Geometry
        /// <param name="helper">PID参数结构</param>
        /// <param name="prvalue">实际值</param>
        /// <returns></returns>
-        public static double PidCalculate(PIDHelper helper,double prvalue)
+        public static double PIDCalculate(PIDHelper helper,double prvalue)
         {
             double value = prvalue;
             helper.Err_Next = helper.Err_Last;
