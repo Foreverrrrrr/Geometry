@@ -379,6 +379,21 @@ namespace Geometry
         }
 
         /// <summary>
+        /// 寻峰类型
+        /// </summary>
+        public enum Wave
+        {
+            /// <summary>
+            /// 波峰
+            /// </summary>
+            Wavecrest,
+            /// <summary>
+            /// 波谷
+            /// </summary>
+            Trough
+        }
+
+        /// <summary>
         /// 点线测量
         /// </summary>
         /// <param name="linex1">线起始X</param>
@@ -514,7 +529,7 @@ namespace Geometry
         }
 
         /// <summary>
-        /// 一介卡尔曼滤波算法
+        /// 一阶卡尔曼滤波算法
         /// </summary>
         /// <param name="kalman">卡尔曼参数</param>
         /// <param name="value">输入值</param>
@@ -540,6 +555,77 @@ namespace Geometry
                 kalman.Cov = predCov - (K * kalman.C * predCov);
             }
             return kalman.X;
+        }
+
+        /// <summary>
+        /// 数据寻峰算法
+        /// </summary>
+        /// <param name="data">数据集</param>
+        /// <param name="PeakStyle">寻峰类型</param>
+        /// <returns>数据集下标索引</returns>
+        public static int[] FindPeaks(double[] data, Wave PeakStyle)
+        {
+            double[] diff = new double[data.Length - 1];
+            for (int i = 0; i < diff.Length; i++)
+            {
+                diff[i] = data[i + 1] - data[i];
+            }
+            int[] sign = new int[diff.Length];
+            for (int i = 0; i < sign.Length; i++)//波峰波谷区分
+            {
+                //if (diff[i] > 3) sign[i] = 1;
+                //else if (diff[i] == 0) sign[i] = 0;
+                //else sign[i] = -1;
+                if (diff[i] > 3)
+                {
+                    sign[i] = 1;
+                }
+                else if (diff[i] < -1)
+                {
+                    sign[i] = -1;
+                }
+                else
+                {
+                    sign[i] = 0;
+                }
+            }
+            for (int i = sign.Length - 1; i >= 0; i--)
+            {
+                if (sign[i] == 0 && i == sign.Length - 1)
+                {
+                    sign[i] = 1;
+                }
+                else if (sign[i] == 0)
+                {
+                    if (sign[i + 1] >= 0)
+                    {
+                        sign[i] = 1;
+                    }
+                    else
+                    {
+                        sign[i] = -1;
+                    }
+                }
+            }
+            List<int> result = new List<int>();
+            for (int i = 0; i != sign.Length - 1; i++)
+            {
+                if (PeakStyle == Wave.Wavecrest)
+                {
+                    if (sign[i + 1] - sign[i] == -2)
+                    {
+                        result.Add(i + 1);
+                    }
+                }
+                else if (PeakStyle == Wave.Trough)
+                {
+                    if (sign[i + 1] - sign[i] == 2)
+                    {
+                        result.Add(i + 1);
+                    }
+                }
+            }
+            return result.ToArray();//相当于原数组的下标
         }
     }
 }
