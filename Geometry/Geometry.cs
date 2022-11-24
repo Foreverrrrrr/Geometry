@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Geometry
 {
@@ -197,7 +194,7 @@ namespace Geometry
             /// <param name="MaxLimit">最大值限制</param>
             /// <param name="MinLimit">最小值限制</param>
             /// <param name="setvalue">目标值</param>
-            public PIDHelper(double Kp, double Ki, double Kd, double DeadBand, double MaxLimit, double MinLimit,double setvalue)
+            public PIDHelper(double Kp, double Ki, double Kd, double DeadBand, double MaxLimit, double MinLimit, double setvalue)
             {
                 prakp = Kp;
                 praki = Ki;
@@ -207,7 +204,7 @@ namespace Geometry
                 MINLIM = MinLimit;
                 setValue = setvalue;
                 err = 0;
-                err_last=0;
+                err_last = 0;
                 err_next = 0;
             }
 
@@ -272,7 +269,7 @@ namespace Geometry
             public double Err
             {
                 get => this.err;
-                set=> this.err = value;
+                set => this.err = value;
             }
 
             private double err_last;
@@ -295,14 +292,14 @@ namespace Geometry
 
         public struct Kalman
         {
-            public Kalman(double R,double Q,double A=1,double B=0,double C=1,double x=0)
+            public Kalman(double R, double Q, double A = 1, double B = 0, double C = 1, double x = 0)
             {
-                _a=A;
-                _b=B;
-                _c=C;
+                _a = A;
+                _b = B;
+                _c = C;
                 _r = R;
-                _q=Q;
-                _x=x;
+                _q = Q;
+                _x = x;
                 _cov = double.NaN;
             }
 
@@ -394,6 +391,132 @@ namespace Geometry
         }
 
         /// <summary>
+        /// 位置矩阵
+        /// </summary>
+        public struct Matrix
+        {
+            /// <summary>
+            /// 位置矩阵
+            /// </summary>
+            /// <param name="column">列</param>
+            /// <param name="row">行</param>
+            /// <param name="p0">点一</param>
+            /// <param name="p1">点二</param>
+            /// <param name="p2">点三</param>
+            /// <param name="p3">点三</param>
+            public Matrix(int column, int row, Point2D p0, Point2D p1, Point2D p2, Point2D p3)
+            {
+                _row = row;
+                _column = column;
+                _total = row * column;
+                _p0 = p0;
+                _p1 = p1;
+                _p2 = p2;
+                _p3 = p3;
+                _poslist = new Point2D[_column + 1, _row + 1];
+                this.P0 = p0;
+                this.P1 = p1;
+                this.P2 = p2;
+                this.P3 = p3;
+            }
+
+            private int _row;
+            /// <summary>
+            /// 行
+            /// </summary>
+            public int Row
+            {
+                get { return _row; }
+                set { _row = value; _total = (_row + 1) * (_column + 1); }
+            }
+
+            private int _column;
+            /// <summary>
+            /// 列
+            /// </summary>
+            public int Column
+            {
+                get { return _column; }
+                set { _column = value; _total = (_row + 1) * (_column + 1); }
+            }
+
+            private int _total;
+            /// <summary>
+            /// 总数量
+            /// </summary>
+            public int Total
+            {
+                get { return _total; }
+            }
+
+            private Point2D _p0;
+            /// <summary>
+            /// 行、列坐标（0，0）点
+            /// </summary>
+            public Point2D P0
+            {
+                get { return _p0; }
+                set { _p0 = value; }
+            }
+
+            private Point2D _p1;
+            /// <summary>
+            /// 行、列坐标（Row，0）点
+            /// </summary>
+            public Point2D P1
+            {
+                get { return _p1; }
+                set { _p1 = value; }
+            }
+
+            private Point2D _p2;
+            /// <summary>
+            /// 行、列坐标（0，Column）点
+            /// </summary>
+            public Point2D P2
+            {
+                get { return _p2; }
+                set { _p2 = value; }
+            }
+
+            private Point2D _p3;
+            /// <summary>
+            /// 行、列坐标（0，Column）点
+            /// </summary>
+            public Point2D P3
+            {
+                get { return _p3; }
+                set { _p3 = value; }
+            }
+
+
+            private Point2D[,] _poslist;
+            /// <summary>
+            /// 矩阵点位坐标数组
+            /// </summary>
+            public Point2D[,] PosList
+            {
+                get { return _poslist; }
+                set { _poslist = value; }
+            }
+        }
+
+        /// <summary>
+        /// 上料方式
+        /// </summary>
+        public enum Load
+        {
+            /// <summary>
+            /// 正常上料
+            /// </summary>
+            Normal,
+            /// <summary>
+            /// 蛇形上料
+            /// </summary>
+            Snake
+        }
+
+        /// <summary>
         /// 点线测量
         /// </summary>
         /// <param name="linex1">线起始X</param>
@@ -409,10 +532,10 @@ namespace Geometry
             double A = liney2 - liney1;
             double B = linex1 - linex2;
             double C = (linex2 * liney1) - (linex1 * liney2);
-            double outpta = Math.Abs((A * ptx) + (B * pty) + C) / Math.Sqrt((Math.Pow(A, 2.0) + Math.Pow(B, 2.0)));
+            double outpta = Math.Abs((A * ptx) + (B * pty) + C) / Math.Sqrt(Math.Pow(A, 2.0) + Math.Pow(B, 2.0));
             double distance = outpta * conversion;
             double Ptlinex = ((B * B * ptx) - (A * B * pty) - (A * C)) / ((A * A) + (B * B));
-            double Ptliney = (((A * -1) * B * ptx) + (A * A * pty) - (B * C)) / ((A * A) + (B * B));
+            double Ptliney = ((A * -1 * B * ptx) + (A * A * pty) - (B * C)) / ((A * A) + (B * B));
             return new double[] { distance, Ptlinex, Ptliney };
         }
 
@@ -428,10 +551,10 @@ namespace Geometry
             double A = line.EndY - line.StartY;
             double B = line.StartX - line.EndX;
             double C = (line.EndX * line.StartY) - (line.StartX * line.EndY);
-            double outpta = Math.Abs((A * point1.X) + (B * point1.Y) + C) / Math.Sqrt((Math.Pow(A, 2.0) + Math.Pow(B, 2.0)));
+            double outpta = Math.Abs((A * point1.X) + (B * point1.Y) + C) / Math.Sqrt(Math.Pow(A, 2.0) + Math.Pow(B, 2.0));
             double distance = outpta * conversion;
             double Ptlinex = ((B * B * point1.X) - (A * B * point1.Y) - (A * C)) / ((A * A) + (B * B));
-            double Ptliney = (((A * -1) * B * point1.X) + (A * A * point1.Y) - (B * C)) / ((A * A) + (B * B));
+            double Ptliney = ((A * -1 * B * point1.X) + (A * A * point1.Y) - (B * C)) / ((A * A) + (B * B));
             return new double[] { distance, Ptlinex, Ptliney };
         }
 
@@ -446,7 +569,7 @@ namespace Geometry
         /// <returns>距离</returns>
         public static double PointMeasure(double pointx1, double pointy1, double pointx2, double pointy2, double conversion = 1)
         {
-            return Math.Sqrt(Math.Pow((Math.Abs(pointx1 - pointx2)), 2.0) + Math.Pow(Math.Abs((pointy1 - pointy2)), 2.0)) * conversion;
+            return Math.Sqrt(Math.Pow(Math.Abs(pointx1 - pointx2), 2.0) + Math.Pow(Math.Abs(pointy1 - pointy2), 2.0)) * conversion;
         }
 
         /// <summary>
@@ -460,11 +583,11 @@ namespace Geometry
             double k = 0;
             if (criterion == AngleCriterion.PerpendiCularLine)
             {
-                k = ((line.StartX - line.EndX) / (line.StartY - line.EndY));
+                k = (line.StartX - line.EndX) / (line.StartY - line.EndY);
             }
             else
             {
-                k = ((line.StartY - line.EndY) / (line.StartX - line.EndX));
+                k = (line.StartY - line.EndY) / (line.StartX - line.EndX);
             }
             return Math.Atan(k) * 180 / Math.PI;
         }
@@ -508,22 +631,22 @@ namespace Geometry
             return a1 / b1;
         }
 
-       /// <summary>
-       /// 增量式PID算法
-       /// </summary>
-       /// <param name="helper">PID参数结构</param>
-       /// <param name="prvalue">实际值</param>
-       /// <returns></returns>
-        public static double PIDCalculate(PIDHelper helper,double prvalue)
+        /// <summary>
+        /// 增量式PID算法
+        /// </summary>
+        /// <param name="helper">PID参数结构</param>
+        /// <param name="prvalue">实际值</param>
+        /// <returns></returns>
+        public static double PIDCalculate(PIDHelper helper, double prvalue)
         {
             double value = prvalue;
             helper.Err_Next = helper.Err_Last;
             helper.Err_Last = helper.Err;
             helper.Err = helper.SetValue - value;
-            value += helper.Kp * (helper.Err - helper.Err_Last + helper.Ki * helper.Err + helper.Kd * (helper.Err - 2.0 * helper.Err_Last + helper.Err_Next));
+            value += helper.Kp * (helper.Err - helper.Err_Last + (helper.Ki * helper.Err) + (helper.Kd * (helper.Err - (2.0 * helper.Err_Last) + helper.Err_Next)));
             if (value > helper.MaxLimit)
                 value = helper.MaxLimit;
-            if (value <  helper.MinLimit)
+            if (value < helper.MinLimit)
                 value = helper.MinLimit;
             return value;
         }
@@ -535,23 +658,23 @@ namespace Geometry
         /// <param name="value">输入值</param>
         /// <param name="filtered"></param>
         /// <returns></returns>
-        public static double AlittleKalman(Kalman kalman,double value,double filtered)
+        public static double AlittleKalman(Kalman kalman, double value, double filtered)
         {
             if (double.IsNaN(kalman.X))
             {
-                kalman.X = (1 / kalman.C) * value;
-                kalman.Cov = (1 / kalman.C) * kalman.Q * (1 / kalman.C);
+                kalman.X = 1 / kalman.C * value;
+                kalman.Cov = 1 / kalman.C * kalman.Q * (1 / kalman.C);
             }
             else
             {
                 double predX = (kalman.A * kalman.X) + (kalman.B * filtered);
-                double predCov = ((kalman.A * kalman.Cov) * kalman.A) + kalman.R;
+                double predCov = (kalman.A * kalman.Cov * kalman.A) + kalman.R;
 
                 // Kalman gain
                 double K = predCov * kalman.C * (1 / ((kalman.C * predCov * kalman.C) + kalman.Q));
 
                 // Correction
-                kalman.X = predX + K * (value - (kalman.C * predX));
+                kalman.X = predX + (K * (value - (kalman.C * predX)));
                 kalman.Cov = predCov - (K * kalman.C * predCov);
             }
             return kalman.X;
@@ -626,6 +749,102 @@ namespace Geometry
                 }
             }
             return result.ToArray();//相当于原数组的下标
+        }
+
+        /// <summary>
+        /// 矩阵上料
+        /// </summary>
+        /// <param name="matrix">矩阵结构</param>
+        /// <param name="model">类型</param>
+        /// <param name="loadnumber">取料个数</param>
+        /// <param name="serialnumber">起始取料序列</param>
+        public static Point2D[] MatrixLoadMaterial(Matrix matrix, Load model, int loadnumber, int serialnumber)
+        {
+            Point2D[] sitepoint = new Point2D[loadnumber];
+            int count = 0;
+            if (model == Load.Snake)
+            {
+                int j = serialnumber % matrix.Row;
+                for (int i = serialnumber / matrix.Column; i < matrix.Column; i++)
+                {
+                    for (; j < matrix.Row; j++)
+                    {
+                        if (i % 2 == 0)
+                            sitepoint[count] = matrix.PosList[i, j];
+                        else if (i % 2 != 0)
+                            sitepoint[count] = matrix.PosList[i, matrix.Row - j - 1];
+                        count++;
+                        if (count == loadnumber)
+                            break;
+                    }
+                    j = 0;
+                    if (count == loadnumber)
+                        break;
+                }
+            }
+            return sitepoint;
+        }
+
+        /// <summary>
+        /// 单线定比分
+        /// </summary>
+        /// <param name="startpoint">起始点坐标</param>
+        /// <param name="endpoint">结束点坐标</param>
+        /// <param name="quantile">等分数</param>
+        /// <returns>等分坐标</returns>
+        public static Point2D[] DefiniteProportionSetPoint(Point2D startpoint, Point2D endpoint, int quantile)
+        {
+            Point2D[] doubles = new Point2D[quantile + 1];
+            for (double i = 0; i <= quantile; i++)
+            {
+                doubles[(int)i].X = Math.Round(((endpoint.X - startpoint.X) * i) / quantile + startpoint.X, 5);
+                doubles[(int)i].Y = Math.Round(((endpoint.Y - startpoint.Y) * i) / quantile + startpoint.Y, 5);
+            }
+            return doubles;
+        }
+
+        /// <summary>
+        /// 四点定比分
+        /// </summary>
+        /// <param name="point0">点一</param>
+        /// <param name="point1">点二</param>
+        /// <param name="point2">点三</param>
+        /// <param name="point3">点四</param>
+        /// <param name="column">列数</param>
+        /// <param name="row">行数</param>
+        /// <returns>行列内所有等分坐标</returns>
+        public static Matrix DefiniteProportionSetPoint(Point2D point0, Point2D point1, Point2D point2, Point2D point3, int column, int row)
+        {
+            Point2D[,] doubles = new Point2D[column + 1, row + 1];
+            Matrix matrix = new Matrix();
+            var left = DefiniteProportionSetPoint(point0, point1, column);
+            var right = DefiniteProportionSetPoint(point2, point3, column);
+            if (left != null && right != null && left.Length == right.Length)
+            {
+                for (int i = 0; i < left.Length; i++)
+                {
+                    doubles[i, 0] = left[i];
+                    doubles[i, column] = right[i];
+                }
+                for (int i = 0; i <= column; i++)
+                {
+                    var retpoint = DefiniteProportionSetPoint(doubles[i, 0], doubles[i, column], column);
+                    for (int j = 0; j <= row; j++)
+                        doubles[i, j] = retpoint[j];
+                }
+                matrix = new Matrix
+                {
+                    Column = column + 1,
+                    Row = row + 1,
+                    P0 = point0,
+                    P1 = point1,
+                    P2 = point2,
+                    P3 = point3,
+                    PosList = doubles,
+
+                };
+            }
+            return matrix;
         }
     }
 }
