@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Geometry
 {
@@ -413,7 +414,7 @@ namespace Geometry
                 _p1 = p1;
                 _p2 = p2;
                 _p3 = p3;
-                _poslist = new Point2D[_column + 1, _row + 1];
+                _poslist = new Point2D[_column, _row];
                 this.P0 = p0;
                 this.P1 = p1;
                 this.P2 = p2;
@@ -427,7 +428,7 @@ namespace Geometry
             public int Row
             {
                 get { return _row; }
-                set { _row = value; _total = (_row + 1) * (_column + 1); }
+                set { _row = value; _total = (_row) * (_column); }
             }
 
             private int _column;
@@ -437,7 +438,7 @@ namespace Geometry
             public int Column
             {
                 get { return _column; }
-                set { _column = value; _total = (_row + 1) * (_column + 1); }
+                set { _column = value; _total = (_row) * (_column); }
             }
 
             private int _total;
@@ -514,6 +515,32 @@ namespace Geometry
             /// 蛇形上料
             /// </summary>
             Snake
+        }
+
+        /// <summary>
+        /// 插补误差结构体
+        /// </summary>
+        public struct Interpolator
+        {
+            /// <summary>
+            /// 最大误差出现索引
+            /// </summary>
+            public int MaxErrItem { get; set; }
+
+            /// <summary>
+            /// 最大误差值
+            /// </summary>
+            public double MaxErrValue { get; set; }
+
+            /// <summary>
+            /// 平均误差
+            /// </summary>
+            public double AverageErrValue { get; set; }
+
+            /// <summary>
+            /// 计算次数
+            /// </summary>
+            public int Countimes { get; set; }
         }
 
         /// <summary>
@@ -681,12 +708,12 @@ namespace Geometry
         }
 
         /// <summary>
-        /// 数据寻峰算法
+        /// 数据极值寻峰算法
         /// </summary>
         /// <param name="data">数据集</param>
         /// <param name="PeakStyle">寻峰类型</param>
-        /// <returns>数据集下标索引</returns>
-        public static int[] FindPeaks(double[] data, Wave PeakStyle)
+        /// <returns>返回最大数据集下标索引</returns>
+        public static double[] FindPeaksExtremum(double[] data, Wave PeakStyle)
         {
             double[] diff = new double[data.Length - 1];
             for (int i = 0; i < diff.Length; i++)
@@ -696,21 +723,82 @@ namespace Geometry
             int[] sign = new int[diff.Length];
             for (int i = 0; i < sign.Length; i++)//波峰波谷区分
             {
-                //if (diff[i] > 3) sign[i] = 1;
-                //else if (diff[i] == 0) sign[i] = 0;
-                //else sign[i] = -1;
-                if (diff[i] > 3)
-                {
+                if (diff[i] > 0.001)
                     sign[i] = 1;
-                }
-                else if (diff[i] < -1)
-                {
+                else if (diff[i] < -0.001)
                     sign[i] = -1;
-                }
                 else
-                {
                     sign[i] = 0;
+            }
+            for (int i = sign.Length - 1; i >= 0; i--)
+            {
+                if (sign[i] == 0 && i == sign.Length - 1)
+                    sign[i] = 1;
+                else if (sign[i] == 0)
+                {
+                    if (sign[i + 1] >= 0)
+                        sign[i] = 1;
+                    else
+                        sign[i] = -1;
                 }
+            }
+            double[] t = new double[2];
+            if (PeakStyle == Wave.Wavecrest)
+                t[0] = double.MinValue;
+            else if (PeakStyle == Wave.Trough)
+                t[0] = double.MaxValue;
+            for (int i = 0; i != sign.Length - 1; i++)
+            {
+                if (PeakStyle == Wave.Wavecrest)
+                {
+                    if (sign[i + 1] - sign[i] == -2)
+                    {
+                        if (data[i + 1] >= t[0])
+                        {
+                            t[0] = data[i + 1];
+                            t[1] = i + 1;
+                        }
+                    }
+                }
+                else if (PeakStyle == Wave.Trough)
+                {
+                    if (sign[i + 1] - sign[i] == 2)
+                    {
+                        if (data[i + 1] <= t[0])
+                        {
+                            t[0] = data[i + 1];
+                            t[1] = i + 1;
+                        }
+                    }
+                }
+            }
+            if (t[0] == double.MinValue || t[0] == double.MaxValue)
+                t[0] = 0;
+            return t;//相当于原数组的下标
+        }
+
+        /// <summary>
+        /// 数据寻峰算法
+        /// </summary>
+        /// <param name="data">数据集</param>
+        /// <param name="PeakStyle">寻峰类型</param>
+        /// <returns>返回所有峰值</returns>
+        public static List<Point2D> FindPeaks(double[] data, Wave PeakStyle)
+        {
+            double[] diff = new double[data.Length - 1];
+            for (int i = 0; i < diff.Length; i++)
+            {
+                diff[i] = data[i + 1] - data[i];
+            }
+            int[] sign = new int[diff.Length];
+            for (int i = 0; i < sign.Length; i++)
+            {
+                if (diff[i] > 0)
+                    sign[i] = 1;
+                else if (diff[i] < 0)
+                    sign[i] = -1;
+                else
+                    sign[i] = 0;
             }
             for (int i = sign.Length - 1; i >= 0; i--)
             {
@@ -730,25 +818,26 @@ namespace Geometry
                     }
                 }
             }
-            List<int> result = new List<int>();
+            List<Point2D> result = new List<Point2D>();
             for (int i = 0; i != sign.Length - 1; i++)
             {
                 if (PeakStyle == Wave.Wavecrest)
                 {
                     if (sign[i + 1] - sign[i] == -2)
                     {
-                        result.Add(i + 1);
+                        result.Add(new Point2D(i + 1, data[i + 1]));
                     }
                 }
                 else if (PeakStyle == Wave.Trough)
                 {
                     if (sign[i + 1] - sign[i] == 2)
                     {
-                        result.Add(i + 1);
+                        result.Add(new Point2D(i + 1, data[i + 1]));
                     }
                 }
             }
-            return result.ToArray();//相当于原数组的下标
+            return result;//相当于原数组的下标
+
         }
 
         /// <summary>
@@ -815,36 +904,163 @@ namespace Geometry
         /// <returns>行列内所有等分坐标</returns>
         public static Matrix DefiniteProportionSetPoint(Point2D point0, Point2D point1, Point2D point2, Point2D point3, int column, int row)
         {
-            Point2D[,] doubles = new Point2D[column + 1, row + 1];
+            Point2D[,] doubles = new Point2D[column, row];
             Matrix matrix = new Matrix();
-            var left = DefiniteProportionSetPoint(point0, point1, column);
-            var right = DefiniteProportionSetPoint(point2, point3, column);
-            if (left != null && right != null && left.Length == right.Length)
+            var left = DefiniteProportionSetPoint(point0, point1, column - 1);
+            var right = DefiniteProportionSetPoint(point2, point3, column - 1);
+            if (left != null && right != null)
             {
                 for (int i = 0; i < left.Length; i++)
                 {
                     doubles[i, 0] = left[i];
-                    doubles[i, column] = right[i];
+                    doubles[i, row - 1] = right[i];
                 }
-                for (int i = 0; i <= column; i++)
+                for (int i = 0; i < column; i++)
                 {
-                    var retpoint = DefiniteProportionSetPoint(doubles[i, 0], doubles[i, column], column);
-                    for (int j = 0; j <= row; j++)
+                    var retpoint = DefiniteProportionSetPoint(doubles[i, 0], doubles[i, row - 1], row - 1);
+                    for (int j = 0; j < row; j++)
                         doubles[i, j] = retpoint[j];
                 }
                 matrix = new Matrix
                 {
-                    Column = column + 1,
-                    Row = row + 1,
+                    Column = column,
+                    Row = row,
                     P0 = point0,
                     P1 = point1,
                     P2 = point2,
                     P3 = point3,
                     PosList = doubles,
-
                 };
             }
             return matrix;
+        }
+
+        /// <summary>
+        /// 计算数组内相差值为一的众数的平均值
+        /// </summary>
+        /// <param name="doubles"></param>
+        /// <returns></returns>
+        public static double SampleMode(double[] doubles)
+        {
+            if (doubles.Length == 0) return 0;
+            double[] data = doubles;
+            Dictionary<int, int> frequencies = new Dictionary<int, int>();
+            foreach (double d in data)
+            {
+                int rounded = (int)Math.Round(d, 3);
+                if (!frequencies.ContainsKey(rounded))
+                    frequencies[rounded] = 0;
+                frequencies[rounded]++;
+            }
+            int mode = frequencies.OrderByDescending(x => x.Value).FirstOrDefault().Key;
+            List<double> result = new List<double>();
+            foreach (double d in data)
+            {
+                if (d - mode < 1 && d - mode > 0)
+                    result.Add(d);
+            }
+            result.Remove(result.Min());
+            result.Remove(result.Max());
+            return result.Average();
+        }
+
+        /// <summary>
+        /// DDA直线插补算法
+        /// </summary>
+        /// <param name="start">直线起始点</param>
+        /// <param name="end">直线结束点</param>
+        /// <returns></returns>
+        public static Point2D[] DDA_Interpolation(Point2D start, Point2D end)
+        {
+            // 计算起点和终点的坐标差
+            int dx = (int)(end.X - start.X);
+            int dy = (int)(end.Y - start.Y);
+            // 计算插补次数
+            int steps = Math.Max(Math.Abs(dx), Math.Abs(dy));
+            Point2D[] result = new Point2D[steps + 1];
+            result[0] = new Point2D(start.X, start.Y);
+            // 计算每一步的增量
+            double xIncrement = (double)dx / steps;
+            double yIncrement = (double)dy / steps;
+            // 对每一步进行插值，并将结果添加到结果列表中
+            double x = start.X;
+            double y = start.Y;
+            for (int i = 0; i <= steps; i++)
+            {
+                result[i] = new Point2D((int)Math.Round(x), (int)Math.Round(y));
+                x += xIncrement;
+                y += yIncrement;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 逐点直线插补
+        /// </summary>
+        /// <param name="starting">起始点</param>
+        /// <param name="terminus">结束点</param>
+        /// <returns></returns>
+        public static Point2D[] PointwiseLine(Point2D starting, Point2D terminus)
+        {
+            double x = terminus.X - starting.X;
+            double y = terminus.Y - starting.Y;
+            double tan = Math.Abs(y / x);
+            double moving = 0;
+            Point2D[] points = new Point2D[(int)(Math.Abs(x) + Math.Abs(y)) + 1];
+            Point2D point = new Point2D(starting.X, starting.Y);
+            for (int i = 0; i < points.Length; i++)
+            {
+                points[i].X = point.X;
+                points[i].Y = point.Y;
+                moving = Math.Abs((terminus.Y - point.Y) / (terminus.X - point.X));
+                if (moving >= tan)
+                {
+                    if (y >= 0)
+                        point.Y++;
+                    else
+                        point.Y--;
+                }
+                else if (moving < tan)
+                {
+                    if (x >= 0)
+                        point.X++;
+                    else
+                        point.X--;
+                }
+            }
+            return points;
+        }
+
+
+        /// <summary>
+        /// 直线插补误差计算
+        /// </summary>
+        /// <param name="starting">直线起始点</param>
+        /// <param name="terminus">直线结束点</param>
+        /// <param name="points">插补算法返回值</param>
+        /// <returns></returns>
+        public static Interpolator Interpolation_Error(Point2D starting, Point2D terminus, Point2D[] points)
+        {
+            Interpolator interpolator = new Interpolator();
+            double k = (terminus.Y - starting.Y) / (terminus.X - starting.X);
+            double b = terminus.Y - (k * terminus.X);
+            for (int i = 0; i < points.Length; i++)
+            {
+                double y = k * points[i].X + b;
+                double x = (points[i].Y - b) / k;
+                double t = Math.Abs(points[i].Y - y);
+                t = PointMeasure(points[i].X, y, points[i].X, points[i].Y);
+                //var t = PointgoLine(new Line2D(starting.X, starting.Y, terminus.X, terminus.Y), points[i]);
+                interpolator.AverageErrValue += t;
+                if (t > interpolator.MaxErrValue)
+                {
+                    interpolator.MaxErrValue = t;
+                    interpolator.MaxErrItem = i;
+                }
+            }
+            interpolator.Countimes = points.Length;
+            interpolator.AverageErrValue = interpolator.AverageErrValue / points.Length;
+            return interpolator;
         }
     }
 }

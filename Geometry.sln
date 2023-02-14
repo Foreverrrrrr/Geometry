@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geometry", "Geometry\Geomet
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{731B23E2-FC1D-43A7-AE35-C133AC69AFCD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApp1", "WindowsFormsApp1\WindowsFormsApp1.csproj", "{9504F240-2CAD-4BAC-98A9-E604908A1F69}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,14 @@ Global
 		{731B23E2-FC1D-43A7-AE35-C133AC69AFCD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{731B23E2-FC1D-43A7-AE35-C133AC69AFCD}.Release|x64.ActiveCfg = Release|Any CPU
 		{731B23E2-FC1D-43A7-AE35-C133AC69AFCD}.Release|x64.Build.0 = Release|Any CPU
+		{9504F240-2CAD-4BAC-98A9-E604908A1F69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9504F240-2CAD-4BAC-98A9-E604908A1F69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9504F240-2CAD-4BAC-98A9-E604908A1F69}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9504F240-2CAD-4BAC-98A9-E604908A1F69}.Debug|x64.Build.0 = Debug|Any CPU
+		{9504F240-2CAD-4BAC-98A9-E604908A1F69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9504F240-2CAD-4BAC-98A9-E604908A1F69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9504F240-2CAD-4BAC-98A9-E604908A1F69}.Release|x64.ActiveCfg = Release|Any CPU
+		{9504F240-2CAD-4BAC-98A9-E604908A1F69}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
